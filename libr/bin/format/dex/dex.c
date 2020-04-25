@@ -16,8 +16,7 @@ char* r_bin_dex_get_version(RBinDexObj *bin) {
 
 // XXX this is never called
 void r_bin_dex_free(RBinDexObj *dex) {
-	// TODO: more leaks
-	ht_up_free (dex->htup_strings);
+	r_pvector_fini (&dex->vec_strings);
 	free (dex);
 }
 

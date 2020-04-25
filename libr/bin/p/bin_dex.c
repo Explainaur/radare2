@@ -81,10 +81,10 @@ static char *getstr(RBinDexObj *dex, int idx) {
 	if (idx < 0 || idx >= dex->header.strings_size || !dex->strings) {
 		return NULL;
 	}
-	if (dex->htup_strings) {
-		char *res = ht_up_find (dex->htup_strings, idx, NULL);
+	if (dex->vec_strings.v.len > 0) {
+		void **res = r_pvector_index_ptr (&dex->vec_strings, idx);
 		if (res) {
-			return res;
+			return (char *)*res;
 		}
 	}
 	const ut32 string_index = dex->strings[idx];
@@ -106,11 +106,11 @@ static char *getstr(RBinDexObj *dex, int idx) {
 	if (ptr) {
 		r_buf_read_at (dex->b, string_index + uleblen, ptr, len);
 		ptr[len] = 0;
-		if (!dex->htup_strings) {
-			dex->htup_strings = ht_up_new0 ();
+		if (dex->vec_strings.v.len) {
+			r_pvector_init (&dex->vec_strings, free);
 		}
-		if (dex->htup_strings) {
-			ht_up_insert (dex->htup_strings, idx, ptr);
+		if (dex->vec_strings.v.len) {
+			r_pvector_insert (&dex->vec_strings, idx, ptr);
 		}
 		return (char *)ptr;
 	}
